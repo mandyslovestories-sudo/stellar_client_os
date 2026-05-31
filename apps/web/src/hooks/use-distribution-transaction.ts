@@ -7,6 +7,7 @@ import { useWallet } from '@/providers/StellarWalletProvider';
 import { notify } from '@/utils/notification';
 import { DISTRIBUTOR_CONTRACT_ID, SOROBAN_RPC_URL, NETWORK_PASSPHRASE } from '@/lib/constants';
 import { amountToStroops } from '@/utils/amount-validation';
+import { getStellarServerOptions } from '@/utils/rpc-connection-options';
 import type { DistributionState } from '@/types/distribution';
 
 const IS_MAINNET = process.env.NEXT_PUBLIC_STELLAR_NETWORK === 'public';
@@ -34,7 +35,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
  */
 async function accountExists(address: string): Promise<boolean> {
   try {
-    const horizon = new Horizon.Server(HORIZON_URL, { allowHttp: true });
+    const horizon = new Horizon.Server(HORIZON_URL, getStellarServerOptions(HORIZON_URL));
     await withTimeout(horizon.loadAccount(address), ACCOUNT_CHECK_TIMEOUT_MS, address);
     return true;
   } catch (err) {
@@ -55,7 +56,7 @@ async function checkSenderBalance(
   requiredAmount: bigint
 ): Promise<{ ok: boolean; reason?: string }> {
   try {
-    const horizon = new Horizon.Server(HORIZON_URL, { allowHttp: true });
+    const horizon = new Horizon.Server(HORIZON_URL, getStellarServerOptions(HORIZON_URL));
     const account = await horizon.loadAccount(senderAddress);
 
     if (tokenAddress === 'native') {
